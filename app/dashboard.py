@@ -39,9 +39,10 @@ st.markdown(
       #MainMenu {visibility: hidden;}
       footer {visibility: hidden;}
       [data-testid="stToolbar"] {display: none;}
-      /* Collapse the empty top band left by the hidden toolbar/header. */
-      [data-testid="stHeader"] {height: 0rem;}
-      .block-container {padding-top: 1.5rem !important;}
+      /* Remove the fixed header bar entirely so it can't overlap content,
+         then use a modest top padding (default is ~6rem, leaving a big void). */
+      [data-testid="stHeader"] {display: none;}
+      .block-container {padding-top: 2.5rem !important;}
     </style>
     """,
     unsafe_allow_html=True,
