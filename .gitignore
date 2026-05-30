@@ -6,9 +6,12 @@ __pycache__/
 .pytest_cache/
 .ipynb_checkpoints/
 
-# Data cache & processed artefacts (rebuildable from the pipeline)
+# Raw raster/boundary cache — large, rebuildable, never committed.
 data/raw/
-data/processed/
+
+# NOTE: data/processed/ is intentionally COMMITTED. The artefacts are tiny
+# (~1 MB total) and let the dashboard deploy to Streamlit Cloud without running
+# the heavy geo pipeline on the host. Rebuild them anytime with `make pipeline`.
 
 # OS / editor
 .DS_Store

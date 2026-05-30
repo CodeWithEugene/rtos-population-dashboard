@@ -39,6 +39,9 @@ st.markdown(
       #MainMenu {visibility: hidden;}
       footer {visibility: hidden;}
       [data-testid="stToolbar"] {display: none;}
+      /* Collapse the empty top band left by the hidden toolbar/header. */
+      [data-testid="stHeader"] {height: 0rem;}
+      .block-container {padding-top: 1.5rem !important;}
     </style>
     """,
     unsafe_allow_html=True,

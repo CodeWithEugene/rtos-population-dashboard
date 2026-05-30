@@ -47,9 +47,36 @@ make dashboard   # launch the Streamlit app at http://localhost:8501
 make test        # run the offline unit tests
 ```
 
-No data is committed — everything is rebuilt from the public sources by the
-pipeline. Re-running is cheap: downloads and outputs are cached and the build is
-idempotent.
+The raw rasters (`data/raw/`) are never committed — they're rebuilt from the
+public sources and cached. The small **processed artefacts (`data/processed/`,
+~1 MB) _are_ committed**, so the dashboard can be deployed without running the
+geo pipeline on the host (see *Deploy* below).
+
+---
+
+## Deploy (Streamlit Community Cloud)
+
+The dashboard is intentionally cheap to host: it only reads the pre-built
+`data/processed/` artefacts and **never loads a raster**, so it needs none of the
+GDAL/geo stack. Runtime dependencies are the slim `requirements.txt`; the heavy
+pipeline deps stay in `pyproject.toml`.
+
+1. **Push the repo to GitHub**, including `data/processed/` and `requirements.txt`.
+   (Rebuild the data first with `make pipeline` if it's stale.)
+2. Go to **[share.streamlit.io](https://share.streamlit.io)** → **New app** →
+   select the repo/branch.
+3. Leave **Main file path** as the default `streamlit_app.py` (a thin shim that
+   runs `app/dashboard.py`) — or set it to `app/dashboard.py` directly. Under
+   *Advanced settings*, choose **Python 3.12**.
+4. **Deploy.** It builds in ~1 minute (no GDAL) and goes live at
+   `https://<user>-rtos-population-dashboard.streamlit.app`.
+
+To refresh the live data later, re-run `make pipeline`, commit the updated
+`data/processed/`, and push — Streamlit Cloud redeploys automatically.
+
+> **Other targets.** The same slim app runs anywhere: Hugging Face Spaces
+> (Streamlit SDK), or a container on Render / Cloud Run / Fly using a Dockerfile.
+> Ask if you want those scaffolded.
 
 ---
 
