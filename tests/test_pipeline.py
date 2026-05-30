@@ -88,7 +88,7 @@ def test_indicator_math():
 
 
 # --------------------------------------------------------------------------- #
-# Zonal core (synthetic raster — no network)                                  #
+# Zonal core (synthetic raster, no network)                                   #
 # --------------------------------------------------------------------------- #
 def test_zonal_sum_partitions_population(tmp_path):
     import rasterio

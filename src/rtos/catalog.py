@@ -2,8 +2,9 @@
 
 The catalog is the bridge between *configuration* (countries, sexes, age bands)
 and the *physical files* on the WorldPop server. It enumerates every
-(country, sex, age-band) combination and, conversely, can recover that metadata
-from a filename — which keeps the rest of the pipeline declarative.
+(country, sex, age-band) combination and, going the other way, can recover that
+metadata from a filename. That two-way mapping is what lets the rest of the
+pipeline stay declarative.
 """
 from __future__ import annotations
 
@@ -59,8 +60,9 @@ def build_catalog(cfg: Config | None = None) -> list[RasterItem]:
 def parse_filename(filename: str) -> dict:
     """Recover ``{iso, sex, age_code, year}`` from a WorldPop filename.
 
-    Raises ``ValueError`` if the name does not match the expected convention —
-    a deliberate guard so silently-mislabelled files never enter the table.
+    Raises ``ValueError`` if the name does not match the expected convention.
+    That is a deliberate guard so a mislabelled file can never slip silently
+    into the table.
     """
     m = _FILENAME_RE.match(Path(filename).name)
     if not m:

@@ -1,6 +1,6 @@
 # ---------------------------------------------------------------------------
 # Single source of truth for the pipeline.
-# Adding a country or changing the year/resolution is a config edit only —
+# Adding a country or changing the year/resolution is a config edit only, with
 # no code changes required. This is what makes the pipeline "extensible".
 # ---------------------------------------------------------------------------
 

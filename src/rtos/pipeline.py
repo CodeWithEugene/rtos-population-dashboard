@@ -69,7 +69,7 @@ def process_country(
     for it in items:
         if grid.matches(it.local_path):
             lab, ids = labels, gids
-        else:  # rare: a file on a different grid — rasterize to its own grid
+        else:  # rare: a file on a different grid, so rasterize to its own
             g2 = Grid.from_raster(it.local_path)
             lab, ids = rasterize_districts(gdf, g2)
         sums = zonal_sum(it.local_path, lab, len(ids))
@@ -105,7 +105,7 @@ def run(
         raise SystemExit(f"No matching countries for {countries!r}")
 
     wanted = [it for it in catalog if it.country in selected]
-    _log(f"Fetching {len(wanted)} rasters (cached when possible)…")
+    _log(f"Fetching {len(wanted)} rasters (cached when possible)...")
     fetch_many([(it.url, it.local_path) for it in wanted], force=force, progress=progress)
 
     session = make_session()

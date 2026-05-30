@@ -1,12 +1,12 @@
 """Fast zonal aggregation of population rasters by administrative district.
 
-Design note — why this is fast:
-    All age/sex rasters for a country share an identical grid. So we rasterize
-    the district polygons into an integer *label* grid **once** per country,
-    then reduce every raster with a single ``np.bincount`` group-sum. That turns
-    N polygon-mask operations per file into one vectorised pass — O(pixels)
-    regardless of how many districts or files there are. (For sub-pixel exactness
-    one could swap in ``exactextract``; at 1 km the centroid rule is standard.)
+Why this is fast: all age/sex rasters for a country share an identical grid, so
+we rasterize the district polygons into an integer label grid once per country
+and then reduce every raster with a single ``np.bincount`` group-sum. That turns
+N polygon-mask operations per file into one vectorised pass, which is O(pixels)
+no matter how many districts or files there are. (If sub-pixel exactness ever
+matters, ``exactextract`` could drop in here; at 1 km the centroid rule used
+below is standard practice.)
 """
 from __future__ import annotations
 
@@ -20,6 +20,8 @@ from rasterio.features import rasterize
 
 @dataclass(frozen=True)
 class Grid:
+    """The georeferencing of a raster: affine transform, pixel size and CRS."""
+
     transform: rasterio.Affine
     width: int
     height: int
@@ -27,10 +29,12 @@ class Grid:
 
     @classmethod
     def from_raster(cls, path) -> "Grid":
+        """Read the grid definition from a raster file."""
         with rasterio.open(path) as src:
             return cls(src.transform, src.width, src.height, src.crs)
 
     def matches(self, path) -> bool:
+        """True if ``path`` has the same size and transform as this grid."""
         with rasterio.open(path) as src:
             return (
                 src.width == self.width

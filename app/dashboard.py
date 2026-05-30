@@ -26,23 +26,24 @@ from rtos.config import load_config  # noqa: E402
 from rtos.indicators import summarise  # noqa: E402
 
 st.set_page_config(
-    page_title="WorldPop 2025 — Kenya & Uganda",
+    page_title="WorldPop 2025: Kenya & Uganda",
     page_icon="🌍",
     layout="wide",
 )
 
-# Hide residual Streamlit chrome (the "Made with Streamlit" footer, the main
-# menu and the Deploy toolbar) for a clean, product-like presentation.
+# A little CSS polish: hide the "Made with Streamlit" footer and tighten the
+# oversized default top padding. The top-right menu (theme/settings) stays,
+# courtesy of toolbarMode = "viewer" in .streamlit/config.toml.
 st.markdown(
     """
     <style>
-      #MainMenu {visibility: hidden;}
+      /* Hide only the "Made with Streamlit" footer; keep the top-right menu
+         (theme/settings) which `toolbarMode = "viewer"` leaves in place. */
       footer {visibility: hidden;}
-      [data-testid="stToolbar"] {display: none;}
-      /* Remove the fixed header bar entirely so it can't overlap content,
-         then use a modest top padding (default is ~6rem, leaving a big void). */
-      [data-testid="stHeader"] {display: none;}
-      .block-container {padding-top: 2.5rem !important;}
+      [data-testid="stHeader"] {background: transparent;}
+      /* Trim Streamlit's oversized default top padding (~6rem) to a value that
+         still clears the fixed header so nothing is overlapped. */
+      .block-container {padding-top: 3.5rem !important;}
     </style>
     """,
     unsafe_allow_html=True,
@@ -89,7 +90,7 @@ def _ordered_age_labels(df: pd.DataFrame) -> list[str]:
 # Guard: data must be built first                                             #
 # --------------------------------------------------------------------------- #
 if not TIDY_PATH.exists():
-    st.title("🌍 WorldPop 2025 — Kenya & Uganda")
+    st.title("🌍 WorldPop 2025: Kenya & Uganda")
     st.warning(
         "Processed data not found. Build it first:\n\n"
         "```bash\nmake pipeline   # or: python -m rtos.pipeline\n```"
@@ -112,12 +113,12 @@ sex_map = {"Both": ["female", "male"], "Female": ["female"], "Male": ["male"]}
 sexes = sex_map[sex_choice]
 
 age_preset = st.sidebar.radio(
-    "Age group", ["All ages", "Children (0–14)", "Working age (15–64)",
+    "Age group", ["All ages", "Children (0-14)", "Working age (15-64)",
                   "Elderly (65+)", "Custom"],
 )
 preset_codes = {
-    "Children (0–14)": {0, 1, 5, 10},
-    "Working age (15–64)": {15, 20, 25, 30, 35, 40, 45, 50, 55, 60},
+    "Children (0-14)": {0, 1, 5, 10},
+    "Working age (15-64)": {15, 20, 25, 30, 35, 40, 45, 50, 55, 60},
     "Elderly (65+)": {65, 70, 75, 80, 85, 90},
 }
 if age_preset == "Custom":
@@ -176,7 +177,7 @@ st.markdown(
       <div style="font-size:0.74rem; letter-spacing:0.2em; text-transform:uppercase;
                   color:#64748b; font-weight:700;">Public-health population intelligence</div>
       <h1 style="margin:0.25rem 0 0.15rem 0; font-size:2.1rem; line-height:1.2;">
-        🌍 WorldPop 2025 — Age &amp; Sex Population</h1>
+        🌍 WorldPop 2025: Age &amp; Sex Population</h1>
       <div style="color:#475569; font-size:1rem; margin-bottom:0.35rem;">
         Age- and sex-structured population for Kenya &amp; Uganda, summarised to
         districts at 1&nbsp;km resolution.</div>
@@ -188,15 +189,20 @@ st.markdown(
 )
 
 def _fmt(value: float, spec: str) -> str:
-    """Format a metric, showing an em-dash for undefined (nan/inf) ratios."""
-    return "—" if value is None or not math.isfinite(value) else format(value, spec)
+    """Format a metric value, showing "n/a" when a ratio is undefined (nan/inf).
+
+    A sex or age filter can leave a ratio with no denominator (e.g. dependency
+    ratio when only children are selected); those render as "n/a" rather than
+    a confusing "nan".
+    """
+    return "n/a" if value is None or not math.isfinite(value) else format(value, spec)
 
 
 ind = summarise(view).iloc[0]
 c1, c2, c3, c4, c5 = st.columns(5)
 c1.metric("Total population", _fmt(ind["population"], ",.0f"))
-c2.metric("Children 0–14", _fmt(ind["pct_children"], ".1f") + "%")
-c3.metric("Working age 15–64", _fmt(ind["pct_working_age"], ".1f") + "%")
+c2.metric("Children 0-14", _fmt(ind["pct_children"], ".1f") + "%")
+c3.metric("Working age 15-64", _fmt(ind["pct_working_age"], ".1f") + "%")
 c4.metric("Elderly 65+", _fmt(ind["pct_elderly"], ".1f") + "%")
 c5.metric(
     "Age-dependency ratio",
@@ -315,17 +321,17 @@ For the current selection ({' + '.join(countries)}),
 
 A young age structure like this concentrates demand on **maternal and child
 health, immunisation and schooling**, and signals fast future growth in the
-labour force. The choropleth highlights where people are concentrated — useful
+labour force. The choropleth highlights where people are concentrated, useful
 for siting facilities and planning outbreak response and routine services.
         """
     )
     with st.expander("Indicator definitions & method"):
         st.markdown(
             """
-- **Children / Working age / Elderly** — shares of population aged 0–14, 15–64, 65+.
-- **Age-dependency ratio** — (children + elderly) ÷ working-age × 100.
-- **Sex ratio** — males per 100 females.
-- **Method** — each WorldPop 1 km raster is summed within GADM Level-2
+- **Children / Working age / Elderly**: shares of population aged 0-14, 15-64, 65+.
+- **Age-dependency ratio**: (children + elderly) ÷ working-age × 100.
+- **Sex ratio**: males per 100 females.
+- **Method**: each WorldPop 1 km raster is summed within GADM Level-2
   districts via a one-pass rasterized zonal reduction; *total* = male + female.
             """
         )

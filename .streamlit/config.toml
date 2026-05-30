@@ -1,7 +1,7 @@
-# Hide the Streamlit app chrome (Deploy button + main menu) for a clean,
-# product-like dashboard. "minimal" keeps only strictly necessary toolbar items.
+# "viewer" keeps the top-right menu (Settings/theme, Print, About) for end users
+# but hides developer-only chrome such as the Deploy button.
 [client]
-toolbarMode = "minimal"
+toolbarMode = "viewer"
 
 [browser]
 gatherUsageStats = false

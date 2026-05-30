@@ -1,10 +1,10 @@
-"""Cached, resumable-by-existence HTTP fetching.
+"""Cached, fault-tolerant HTTP fetching.
 
-Files are accessed *programmatically* (never manually downloaded) and cached on
-disk. A file is only re-downloaded if it is missing or its size disagrees with
-the server's ``Content-Length`` — so re-running the pipeline is cheap and
-idempotent. Downloads are written atomically (temp file + rename) so an
-interrupted run never leaves a half-written raster in the cache.
+Files are accessed programmatically (never downloaded by hand) and cached on
+disk. A file is only re-downloaded when it is missing or its size disagrees with
+the server's ``Content-Length``, so re-running the pipeline is cheap and
+idempotent. Each download is written atomically (to a temp file, then renamed)
+so an interrupted run never leaves a half-written raster behind.
 """
 from __future__ import annotations
 
@@ -22,16 +22,16 @@ _MAX_ATTEMPTS = 6    # whole-download retries (covers mid-stream disconnects)
 
 
 def make_session() -> requests.Session:
-    """A session that transparently retries connection/5xx errors with backoff.
+    """A session that transparently retries connection and 5xx errors with backoff.
 
-    WorldPop/GADM are public mirrors that occasionally reset connections; the
-    Retry adapter reconnects so a single dropped socket never fails the run.
+    WorldPop and GADM are public mirrors that occasionally reset connections, so
+    the Retry adapter reconnects and a single dropped socket never fails the run.
     """
     retry = Retry(
         total=5,
         connect=5,
         read=5,
-        backoff_factor=1.5,                       # 0, 1.5, 3, 6, 12s …
+        backoff_factor=1.5,                       # waits grow: 0, 1.5, 3, 6, 12s
         status_forcelist=(429, 500, 502, 503, 504),
         allowed_methods=frozenset({"GET", "HEAD"}),
         raise_on_status=False,
