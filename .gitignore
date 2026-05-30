@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Data cache & processed artefacts (rebuildable from the pipeline)
+data/raw/
+data/processed/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Claude Code session artefacts
+.claude/

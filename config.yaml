@@ -1,0 +1,45 @@
+# ---------------------------------------------------------------------------
+# Single source of truth for the pipeline.
+# Adding a country or changing the year/resolution is a config edit only —
+# no code changes required. This is what makes the pipeline "extensible".
+# ---------------------------------------------------------------------------
+
+paths:
+  data_dir: data            # everything below lives under here
+  raw: data/raw             # cached rasters + boundaries (git-ignored)
+  processed: data/processed # tidy outputs consumed by the dashboard
+
+countries:
+  - iso: KEN
+    name: Kenya
+  - iso: UGA
+    name: Uganda
+
+worldpop:
+  # Index page: https://data.worldpop.org/GIS/AgeSex_structures/Global_2015_2030/R2025A/2025/
+  base_url: "https://data.worldpop.org/GIS/AgeSex_structures/Global_2015_2030/R2025A/2025"
+  version: v1
+  # The 1 km "unconstrained-adjusted" product. Only the constrained/ folder
+  # is published under 1km_ua; that is the directory the brief points to.
+  resolution_dir: "1km_ua/constrained"
+  year: 2025
+  # Filename template. WorldPop names files like:
+  #   ken_f_00_2025_CN_1km_R2025A_UA_v1.tif
+  # Tokens: {iso} lowercase, {sex} f|m|t, {age} zero-padded 2-digit code.
+  filename_template: "{iso}_{sex}_{age}_2025_CN_1km_R2025A_UA_v1.tif"
+  # Ingest male & female only; "total" is derived (t == m + f) to avoid
+  # double-counting when summing across sex.
+  sexes: [f, m]
+
+gadm:
+  # GADM 4.1 Level-2 (districts) in GeoJSON, WGS84 (EPSG:4326).
+  base_url: "https://geodata.ucdavis.edu/gadm/gadm4.1/json"
+  level: 2
+  filename_template: "gadm41_{iso}_{level}.json.zip"
+  # Douglas-Peucker tolerance (degrees) for the dashboard geojson. The full
+  # polygons stay authoritative for zonal stats; only the map copy is thinned.
+  simplify_tolerance: 0.005
+
+# WorldPop 5-year age codes. Each code is the lower bound of the band:
+#   0 -> age <1, 1 -> 1-4, 5 -> 5-9, ... 85 -> 85-89, 90 -> 90+
+age_codes: [0, 1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90]

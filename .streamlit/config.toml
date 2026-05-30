@@ -1,0 +1,7 @@
+# Hide the Streamlit app chrome (Deploy button + main menu) for a clean,
+# product-like dashboard. "minimal" keeps only strictly necessary toolbar items.
+[client]
+toolbarMode = "minimal"
+
+[browser]
+gatherUsageStats = false
