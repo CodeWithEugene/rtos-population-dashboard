@@ -1,12 +1,8 @@
-"""Fast zonal aggregation of population rasters by administrative district.
+"""Sum population rasters by district, fast.
 
-Why this is fast: all age/sex rasters for a country share an identical grid, so
-we rasterize the district polygons into an integer label grid once per country
-and then reduce every raster with a single ``np.bincount`` group-sum. That turns
-N polygon-mask operations per file into one vectorised pass, which is O(pixels)
-no matter how many districts or files there are. (If sub-pixel exactness ever
-matters, ``exactextract`` could drop in here; at 1 km the centroid rule used
-below is standard practice.)
+All of a country's age/sex rasters share one grid, so we rasterize the districts
+to a label grid once and reduce every raster with a single ``np.bincount``. That
+makes the whole thing O(pixels), regardless of how many districts or files.
 """
 from __future__ import annotations
 
@@ -48,8 +44,8 @@ def rasterize_districts(
 ) -> tuple[np.ndarray, list[str]]:
     """Burn districts onto ``grid``; return (label array, ordered gid_2 list).
 
-    Label 0 means "no district"; district ``i`` burns value ``i + 1``.
-    Districts are reprojected to the raster CRS if they differ.
+    Label 0 is "no district", district ``i`` burns ``i + 1``. Reprojects to the
+    raster CRS if needed.
     """
     if grid.crs is not None and gdf.crs is not None and gdf.crs != grid.crs:
         gdf = gdf.to_crs(grid.crs)
@@ -68,11 +64,10 @@ def rasterize_districts(
 
 
 def zonal_sum(path, labels: np.ndarray, n_districts: int) -> np.ndarray:
-    """Sum raster values within each district label.
+    """Sum raster values per district, returning one total per label in order.
 
-    Returns an array of length ``n_districts``; index ``i`` is the total for the
-    district that burned label ``i + 1``. Nodata, non-finite and negative cells
-    (WorldPop encodes "no population" with a large negative sentinel) are zeroed.
+    Nodata, non-finite and negative cells are zeroed (WorldPop marks "no people"
+    with a large negative value).
     """
     with rasterio.open(path) as src:
         data = src.read(1).astype("float64")

@@ -1,11 +1,7 @@
-"""Interactive dashboard for WorldPop 2025 age/sex population (Kenya & Uganda).
+"""WorldPop 2025 dashboard for Kenya & Uganda.
 
-Reads the tidy outputs produced by ``rtos.pipeline`` (it never touches rasters
-itself, so it loads instantly) and lets a user filter by country, age group and
-sex while a choropleth map, population pyramid and indicator cards update
-together. Run with::
-
-    streamlit run app/dashboard.py
+Reads the pipeline's tidy outputs (never the rasters, so it's instant) and lets
+you filter by country, age and sex. Run: ``streamlit run app/dashboard.py``.
 """
 from __future__ import annotations
 
@@ -31,19 +27,14 @@ st.set_page_config(
     layout="wide",
 )
 
-# A little CSS polish: hide the "Made with Streamlit" footer and tighten the
-# oversized default top padding. The top-right menu (theme/settings) stays,
-# courtesy of toolbarMode = "viewer" in .streamlit/config.toml.
+# Hide the "Made with Streamlit" footer and tighten the top padding. The
+# theme/settings menu stays (via toolbarMode = "viewer" in config.toml).
 st.markdown(
     """
     <style>
-      /* Hide only the "Made with Streamlit" footer; keep the top-right menu
-         (theme/settings) which `toolbarMode = "viewer"` leaves in place. */
       footer {visibility: hidden;}
       [data-testid="stHeader"] {background: transparent;}
-      /* Trim Streamlit's oversized default top padding (~6rem) to a value that
-         still clears the fixed header so nothing is overlapped. */
-      .block-container {padding-top: 3.5rem !important;}
+      .block-container {padding-top: 3.5rem !important;}  /* default ~6rem is too much */
     </style>
     """,
     unsafe_allow_html=True,
@@ -189,12 +180,8 @@ st.markdown(
 )
 
 def _fmt(value: float, spec: str) -> str:
-    """Format a metric value, showing "n/a" when a ratio is undefined (nan/inf).
-
-    A sex or age filter can leave a ratio with no denominator (e.g. dependency
-    ratio when only children are selected); those render as "n/a" rather than
-    a confusing "nan".
-    """
+    """Format a metric, or "n/a" when a ratio is undefined (e.g. dependency
+    ratio with only children selected, so no working-age denominator)."""
     return "n/a" if value is None or not math.isfinite(value) else format(value, spec)
 
 

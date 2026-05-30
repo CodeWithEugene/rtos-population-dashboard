@@ -1,10 +1,8 @@
-"""Derived public-health indicators from the tidy population table.
+"""Public-health indicators from the tidy table: age structure (child/working/
+elderly), dependency ratios, sex ratio and an approximate median age.
 
-These are the numbers a planner actually reasons about: the broad age structure
-(children / working-age / elderly), dependency ratios that drive demand on
-schools, jobs and health services, the sex ratio, and an approximate median age.
-All functions operate on a *long* tidy frame and are agnostic to how it was
-filtered, so the dashboard reuses them on any country/age/sex selection.
+Everything works on a filtered long frame, so the dashboard reuses it on any
+country/age/sex selection.
 """
 from __future__ import annotations
 

@@ -1,8 +1,5 @@
-"""Configuration loading and derived metadata.
-
-Everything the pipeline needs is declared in ``config.yaml`` and surfaced here
-as typed objects, so the rest of the code never hard-codes a URL, age band, or
-country. Add a country or change the year by editing the YAML alone.
+"""Loads config.yaml and exposes it as typed objects, so nothing else in the
+code hard-codes a URL, age band or country. Add a country by editing the YAML.
 """
 from __future__ import annotations
 

@@ -1,10 +1,8 @@
-"""GADM Level-2 administrative boundaries (districts).
+"""GADM Level-2 district boundaries.
 
-Downloads the zipped GeoJSON, loads it, and normalises the columns the rest of
-the pipeline relies on: ``gid_2`` (stable id), ``adm1`` (region/province) and
-``adm2`` (district). Geometries are kept full-resolution for zonal statistics;
-a separately-simplified copy is written for the dashboard map so the browser
-stays responsive.
+Downloads the zipped GeoJSON and normalises its columns to ``gid_2``, ``adm1``
+and ``adm2``. Full-resolution geometry feeds the zonal stats; a simplified copy
+is written for the map so the browser stays responsive.
 """
 from __future__ import annotations
 

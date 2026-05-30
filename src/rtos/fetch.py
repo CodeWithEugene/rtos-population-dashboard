@@ -1,10 +1,8 @@
 """Cached, fault-tolerant HTTP fetching.
 
-Files are accessed programmatically (never downloaded by hand) and cached on
-disk. A file is only re-downloaded when it is missing or its size disagrees with
-the server's ``Content-Length``, so re-running the pipeline is cheap and
-idempotent. Each download is written atomically (to a temp file, then renamed)
-so an interrupted run never leaves a half-written raster behind.
+Files are cached on disk and only re-fetched when missing or the wrong size, so
+re-runs are cheap. Downloads are written atomically (temp file, then rename) so
+an interrupted run never leaves a half-written raster behind.
 """
 from __future__ import annotations
 
@@ -22,10 +20,9 @@ _MAX_ATTEMPTS = 6    # whole-download retries (covers mid-stream disconnects)
 
 
 def make_session() -> requests.Session:
-    """A session that transparently retries connection and 5xx errors with backoff.
+    """A session that retries dropped connections and 5xx errors with backoff.
 
-    WorldPop and GADM are public mirrors that occasionally reset connections, so
-    the Retry adapter reconnects and a single dropped socket never fails the run.
+    The public mirrors reset connections now and then; this rides over it.
     """
     retry = Retry(
         total=5,
@@ -108,11 +105,10 @@ def fetch_many(
     progress: bool = True,
     max_workers: int = 8,
 ) -> list[Path]:
-    """Fetch many (url, dest) pairs concurrently.
+    """Fetch many (url, dest) pairs concurrently, preserving input order.
 
-    Downloads are I/O-bound, so a small thread pool dramatically cuts wall-clock
-    over a high-latency link. Each worker uses its own retrying session; results
-    are returned in the original input order.
+    Downloads are I/O-bound, so a small thread pool cuts wall-clock a lot on a
+    slow link. Each worker gets its own retrying session.
     """
     import threading
     from concurrent.futures import ThreadPoolExecutor
